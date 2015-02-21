@@ -61,7 +61,6 @@ public class MainActivity extends ActionBarActivity {
                     {
                         Log.d("Hotspot","Turned on");
                         createWifiAccessPoint();
-
                     }
                 } catch (InterruptedException e) {
 
@@ -70,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }).start();
         mainWifiObj = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiScanReceiver wifiReciever = new WifiScanReceiver();
+        WifiScanReceiver wifiReciever = new WifiScanReceiver(mainWifiObj);
         registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         mainWifiObj.disconnect();
         mainWifiObj.startScan();
@@ -140,37 +139,27 @@ public class MainActivity extends ActionBarActivity {
 
 
     class WifiScanReceiver extends BroadcastReceiver {
+        WifiManager wifiManager;
+
+        WifiScanReceiver(WifiManager wifi) {
+            wifiManager = wifi;
+        }
+
         public void onReceive(Context c, Intent intent) {
-            WifiManager mainWifiObj;
-            mainWifiObj = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            List l=mainWifiObj.getScanResults();
-//            Toast t;
-//            t = Toast.makeText(getApplicationContext(), l.get(0).toString(), Toast.LENGTH_LONG);
-//            t.show();
-
-            ScanResult t;
-            WifiConfiguration w=new WifiConfiguration();
-            w.allowedAuthAlgorithms.clear();
-            w.allowedGroupCiphers.clear();
-            w.allowedPairwiseCiphers.clear();
-            w.allowedProtocols.clear();
-            w.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-            w.SSID="\"" + "Opp" + "\"";
-            for(int i=0;i<l.size();++i)
-            {
-                t=(ScanResult) l.get(i);
-                if(t.SSID.compareTo("Opp")==0)
-                {
-
-                    flag=false;
-                    text.setText(String.valueOf("0"));
-                    mainWifiObj.addNetwork(w);
-                    int netid=w.networkId;
-                    //mainWifiObj.disconnect();
-                    mainWifiObj.enableNetwork(netid,false);
-                    Toast toast;
-                    toast = Toast.makeText(getApplicationContext(),"Oppurtunistic network detected", Toast.LENGTH_LONG);
-                    toast.show();
+            String networkSSID = "Opp";
+            WifiConfiguration conf = new WifiConfiguration();
+            conf.SSID = "\"" + networkSSID + "\"";
+            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            wifiManager.addNetwork(conf);
+            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            Log.d("Wifi", "Reached the connection phase ");
+            for (WifiConfiguration i : list) {
+                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+                    Log.d("Wifi", "Reached the connection phase inside loop ");
+                    break;
                 }
             }
         }
