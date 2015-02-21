@@ -62,6 +62,12 @@ public class MainActivity extends ActionBarActivity {
                         Log.d("Hotspot","Turned on");
                         createWifiAccessPoint();
                     }
+                    else
+                    {
+                        PeerListenerImpl peerListenerImpl;
+                        peerListenerImpl=new PeerListenerImpl();
+
+                    }
                 } catch (InterruptedException e) {
 
                 }
@@ -100,7 +106,7 @@ public class MainActivity extends ActionBarActivity {
                     {
                         if(isWifiApEnabledmethod.getName().equals("isWifiApEnabled")){
                             while(!(Boolean)isWifiApEnabledmethod.invoke(wifiManager)){
-                            };
+                            }
                             for(Method method1: wmMethods){
                                 if(method1.getName().equals("getWifiApState")){
                                     int apstate;
@@ -113,7 +119,8 @@ public class MainActivity extends ActionBarActivity {
                     }
                     if(apstatus)
                     {
-                        System.out.println("SUCCESSdddd");
+
+                        //System.out.println("SUCCESSdddd");
                         //statusView.append("\nAccess Point Created!");
                         //finish();
                         //Intent searchSensorsIntent = new Intent(this,SearchSensors.class);

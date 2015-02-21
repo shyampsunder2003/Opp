@@ -20,8 +20,13 @@ public class Discovery {
     Discovery(Context c)
     {
         mContext=c;
+        try {
+            socket=new DatagramSocket(10000);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
-    public void start(){
+    public void startBroadcast(){
         try {
             if(socket==null)
             socket = new DatagramSocket(10000);
@@ -37,6 +42,12 @@ public class Discovery {
         timerTask=new DiscoveryBroadcastTimer(sendThread);
         Timer timer = new Timer();
         timer.schedule(timerTask, 0,5000);
+        if(!receiveThread.isAlive())
+            receiveThread.start();
+    }
+    public void startReceive()
+    {
+        receiveThread=new ReceiveThread(socket, (PeerListener) mContext);
         if(!receiveThread.isAlive())
             receiveThread.start();
     }
