@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }).start();
         mainWifiObj = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiScanReceiver wifiReciever = new WifiScanReceiver(mainWifiObj);
+        WifiScanReceiver wifiReciever = new WifiScanReceiver(mainWifiObj,flag);
         registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         mainWifiObj.disconnect();
         mainWifiObj.startScan();

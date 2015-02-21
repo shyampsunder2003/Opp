@@ -28,15 +28,17 @@ public class Discovery {
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        sendThread=new SendThread(socket,mContext);
+        try {
+            sendThread=new SendThread(mContext);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
         receiveThread=new ReceiveThread(socket, (PeerListener) mContext);
         timerTask=new DiscoveryBroadcastTimer(sendThread);
-//        sendThread.start();
         Timer timer = new Timer();
         timer.schedule(timerTask, 0,5000);
         if(!receiveThread.isAlive())
             receiveThread.start();
-
     }
     public void stop()
     {

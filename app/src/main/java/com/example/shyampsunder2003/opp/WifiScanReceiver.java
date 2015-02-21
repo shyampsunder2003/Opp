@@ -14,13 +14,14 @@ import java.util.List;
  */
 class WifiScanReceiver extends BroadcastReceiver {
     WifiManager wifiManager;
-
-    WifiScanReceiver(WifiManager wifi) {
+    public static volatile boolean flag=true;
+    String networkSSID = "Opp";
+    WifiScanReceiver(WifiManager wifi, boolean status) {
         wifiManager = wifi;
+        flag=status;
     }
 
     public void onReceive(Context c, Intent intent) {
-        String networkSSID = "Opp";
         WifiConfiguration conf = new WifiConfiguration();
         conf.SSID = "\"" + networkSSID + "\"";
         conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
@@ -36,5 +37,23 @@ class WifiScanReceiver extends BroadcastReceiver {
                 break;
             }
         }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true)
+                if(wifiManager.getConnectionInfo().getSSID().compareTo(networkSSID)==0)
+                {
+                    flag=false;
+                    break;
+                }
+                else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 }

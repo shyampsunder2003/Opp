@@ -17,9 +17,8 @@ import java.net.SocketException;
 public class SendThread extends Thread {
     DatagramSocket sendSocket;
     Context mContext;
-    SendThread(DatagramSocket socket, Context c)
-    {
-        sendSocket=socket;
+    SendThread(Context c) throws SocketException {
+        sendSocket=new DatagramSocket();
         mContext=c;
     }
     public void run()
@@ -29,7 +28,7 @@ public class SendThread extends Thread {
             if (sendSocket != null) {
                 sendSocket.setBroadcast(true);
             } else {
-                sendSocket = new DatagramSocket(10000);
+                sendSocket = new DatagramSocket();
                 sendSocket.setBroadcast(true);
                 sendSocket.setSoTimeout(0);
             }
@@ -39,7 +38,7 @@ public class SendThread extends Thread {
         DatagramPacket packet = null;
         try {
             packet = new DatagramPacket(data.getBytes(), data.length(),
-                    getBroadcastAddress(), 11000);
+                    getBroadcastAddress(), 10000);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,7 +47,7 @@ public class SendThread extends Thread {
                 sendSocket.send(packet);
                 Log.d("Discovery", "Broadcast done");
             } else {
-                sendSocket = new DatagramSocket(10000);
+                sendSocket = new DatagramSocket();
                 sendSocket.send(packet);
                 Log.d("Discovery", "Broadcast done");
             }

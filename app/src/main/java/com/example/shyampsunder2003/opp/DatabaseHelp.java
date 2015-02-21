@@ -16,14 +16,13 @@ import java.util.LinkedList;
 public class DatabaseHelp {
 
     public static final String KEY_ROWID = "_id";
-    public static final String KEY_LAT = "Latitude";
-    public static final String KEY_LONG = "Longitude";
+    public static final String KEY_MAC = "MAC Address";
     public static final String KEY_TIME = "Time";       //Timestamp at the time of clicking check
-    public static final String KEY_RESULT = "Result";   //Result of the operation, its either 'Failure' or 'Success'
-    public static final String KEY_REASON = "Reason";
+    public static final String KEY_MESSAGE= "Message";
+    public static final String KEY_UID= "Unique Identifier";
     private static final String DATABASE_NAME = "DatabaseDB";
-    private static final String DATABASE_TABLE1 = "locations";  //Contains all the clues downloaded from parse
-    private static final String DATABASE_TABLE2 = "Results";    //Contains all the results of check along with timestamps
+    private static final String DATABASE_TABLE1 = "Devices";  //Contains all the clues downloaded from parse
+    private static final String DATABASE_TABLE2 = "Messages";    //Contains all the results of check along with timestamps
     private static final int DATABASE_VERSION = 1;
 
     private DbHelper ourHelper;
@@ -42,12 +41,12 @@ public class DatabaseHelp {
             // TODO Auto-generated method stub
             db.execSQL("CREATE TABLE " + DATABASE_TABLE1 + " (" +                               //Table creation for clues
                             KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                            KEY_LAT + " TEXT NOT NULL, " +
-                            KEY_LONG + " TEXT NOT NULL);"
+                            KEY_MAC + " TEXT NOT NULL, " +
+                            KEY_TIME + " TEXT NOT NULL);"
             );
             db.execSQL("CREATE TABLE " + DATABASE_TABLE2 + " (" +                               //Table creation for results
                             KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                            KEY_TIME + " TEXT NOT NULL, " + KEY_RESULT + " TEXT NOT NULL, "+ KEY_REASON + " TEXT NOT NULL);"
+                            KEY_TIME + " TEXT NOT NULL, " + KEY_MESSAGE + " TEXT NOT NULL, "+ KEY_MAC + " TEXT NOT NULL);"
             );
 
         }
@@ -81,62 +80,74 @@ public class DatabaseHelp {
         ourHelper.close();
     }
 
-    public long createEntry(String latitude, String longitude) {            //Inserting the clues
+    public long createDeviceEntry(String mac, String timestamp) {            //Inserting the clues
         // TODO Auto-generated method stub
         ContentValues cv = new ContentValues();
-        cv.put(KEY_LAT, latitude);
-        cv.put(KEY_LONG, longitude);
+        cv.put(KEY_MAC, mac);
+        cv.put(KEY_TIME, timestamp);
         return ourDatabase.insert(DATABASE_TABLE1, null, cv);
     }
-    public long createResult(String timestamp, String result, String reason) {             //Inserting the results
+    public long createMessageEntry(String message, String timestamp, String mac) {             //Inserting the results
         // TODO Auto-generated method stub
         ContentValues cv = new ContentValues();
+        cv.put(KEY_MESSAGE, message);
         cv.put(KEY_TIME, timestamp);
-        cv.put(KEY_RESULT, result);
-        cv.put(KEY_REASON, reason);
+        cv.put(KEY_MAC, mac);
         return ourDatabase.insert(DATABASE_TABLE2, null, cv);
     }
-    public int countSolvedClues()                                           //This is to enable us to find out how many clues have passed
+    public boolean containsdevice(String mac)                                           //This is to enable us to find out how many clues have passed
     {                                                                       // and which clue must be served next
-        String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_RESULT};
-        Cursor c = ourDatabase.query(DATABASE_TABLE2, columns,KEY_RESULT+"=\"Success\"", null, null, null, null);
+        String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
+        Cursor c = ourDatabase.query(DATABASE_TABLE2, columns,KEY_MAC+"=\""+mac+"\"", null, null, null, null);
         int result=0;
         result=c.getCount();
-        return result;
+        if(result==0)
+            return false;
+        else
+            return true;
     }
-    public LinkedList getResults()
+    public LinkedList getDevices()
     {
-        Log.d("Results", "Written");
+        Log.d("Database", "getDevices method invoked");
         LinkedList l=new LinkedList();
-        String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_RESULT};
+        String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
         Cursor c = ourDatabase.query(DATABASE_TABLE2, columns,null, null, null, null, null);
         int iRow = c.getColumnIndex(KEY_ROWID);
+        int iMac = c.getColumnIndex(KEY_MAC);
         int iTime = c.getColumnIndex(KEY_TIME);
-        int iResult = c.getColumnIndex(KEY_RESULT);
         String result="";
-        Log.d("Results",String.valueOf(c.getCount()));
+        Log.d("Database",String.valueOf(c.getCount()));
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
-            result = c.getString(iRow) + " " + c.getString(iTime) + " " + c.getString(iResult) ;
+            result =c.getString(iMac) + " " + c.getString(iTime) ;
             l.addLast(result);
-            Log.d("Results","Written");
         }
 
         return l;
     }
-    public String getData(int val) {                                        //To get the clue of our choice
-        // TODO Auto-generated method stub
-        String[] columns = new String[]{ KEY_ROWID, KEY_LAT, KEY_LONG};
-        Cursor c = ourDatabase.query(DATABASE_TABLE1, columns, null, null, null, null, null);
-        String result = "";
-
+    public LinkedList getMessages()
+    {
+        Log.d("Database", "getMessages method invoked");
+        LinkedList l=new LinkedList();
+        String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_MESSAGE, KEY_MAC};
+        Cursor c = ourDatabase.query(DATABASE_TABLE2, columns,null, null, null, null, null);
         int iRow = c.getColumnIndex(KEY_ROWID);
-        int iLat = c.getColumnIndex(KEY_LAT);
-        int iLong = c.getColumnIndex(KEY_LONG);
-        c.moveToPosition(val-1);
-        result = c.getString(iLat) + " " + c.getString(iLong) + "\n";
-
-
-        return result;
+        int iTime = c.getColumnIndex(KEY_TIME);
+        int iMessage = c.getColumnIndex(KEY_MESSAGE);
+        int iMac = c.getColumnIndex(KEY_MAC);
+        String result="";
+        Log.d("Database",String.valueOf(c.getCount()));
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
+            result =c.getString(iTime) + " " + c.getString(iMessage) + " " + c.getString(iMac) ;
+            l.addLast(result);
+        }
+        return l;
+    }
+    public void updateDeviceTime(String mac,String timestamp)
+    {
+        ContentValues cv = new ContentValues();
+        cv.put(KEY_MAC, mac);
+        cv.put(KEY_TIME, timestamp);
+        ourDatabase.update(DATABASE_TABLE1,cv,KEY_MAC+"=\""+mac+"\"",null);
     }
 
 }
