@@ -137,66 +137,6 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-
-    class WifiScanReceiver extends BroadcastReceiver {
-        WifiManager wifiManager;
-
-        WifiScanReceiver(WifiManager wifi) {
-            wifiManager = wifi;
-        }
-
-        public void onReceive(Context c, Intent intent) {
-            String networkSSID = "Opp";
-            WifiConfiguration conf = new WifiConfiguration();
-            conf.SSID = "\"" + networkSSID + "\"";
-            conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-            wifiManager.addNetwork(conf);
-            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-            Log.d("Wifi", "Reached the connection phase ");
-            for (WifiConfiguration i : list) {
-                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(i.networkId, true);
-                    wifiManager.reconnect();
-                    Log.d("Wifi", "Reached the connection phase inside loop ");
-                    break;
-                }
-            }
-        }
-    }
-    public class Count extends Thread {
-        public Thread t;
-        private int val;
-
-        Count(int value){
-            val = value;
-            t=new Thread();
-            t.start();
-        }
-        public void run() {
-
-            try {
-                int i;
-                for(i = 0; i < val && flag; i++) {
-                    Thread.sleep(1000);
-                    Log.d("Sleep",String.valueOf(i));
-                }
-                if(i==val-1)
-                {
-                    createWifiAccessPoint();
-                    Log.d("Hotspot","Turned on");
-                }
-            } catch (InterruptedException e) {
-
-            }
-
-        }
-
-
-
-    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
