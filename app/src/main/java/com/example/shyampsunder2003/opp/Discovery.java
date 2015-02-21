@@ -15,9 +15,9 @@ public class Discovery {
     SendThread sendThread;
     ReceiveThread receiveThread;
     PeerListener listener;
-    Context mContext;
+    PeerListenerImpl mContext;
     TimerTask timerTask;
-    Discovery(Context c)
+    Discovery(PeerListenerImpl c)
     {
         mContext=c;
         try {
@@ -34,7 +34,7 @@ public class Discovery {
             e.printStackTrace();
         }
         try {
-            sendThread=new SendThread(mContext);
+            sendThread=new SendThread();
         } catch (SocketException e) {
             e.printStackTrace();
         }

@@ -29,31 +29,21 @@ class WifiScanReceiver extends BroadcastReceiver {
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         Log.d("Wifi", "Reached the connection phase ");
         for (WifiConfiguration i : list) {
-            if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                wifiManager.disconnect();
-                wifiManager.enableNetwork(i.networkId, true);
-                wifiManager.reconnect();
-                Log.d("Wifi", "Reached the connection phase inside loop ");
-                break;
-            }
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true)
-                if(wifiManager.getConnectionInfo().getSSID().compareTo(networkSSID)==0)
-                {
-                    flag=false;
-                    break;
-                }
-                else {
+            if(wifiManager.getConnectionInfo().getSSID()==null) {
+                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    Log.d("Wifi", "Reached the connection phase inside loop ");
+                    break;
                 }
             }
-        }).start();
+        }
+
     }
 }

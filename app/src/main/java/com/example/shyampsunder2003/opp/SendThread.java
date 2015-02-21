@@ -17,9 +17,8 @@ import java.net.SocketException;
 public class SendThread extends Thread {
     DatagramSocket sendSocket;
     Context mContext;
-    SendThread(Context c) throws SocketException {
+    SendThread() throws SocketException {
         sendSocket=new DatagramSocket();
-        mContext=c;
     }
     public void run()
     {

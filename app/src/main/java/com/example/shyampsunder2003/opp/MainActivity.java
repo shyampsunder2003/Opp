@@ -30,6 +30,7 @@ public class MainActivity extends ActionBarActivity {
     TextView text;
     EditText e1,e2;
     public static volatile boolean flag=true;
+    WifiScanReceiver wifiReciever;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,9 +39,10 @@ public class MainActivity extends ActionBarActivity {
         e1=(EditText) findViewById(R.id.editText);
         e2=(EditText) findViewById(R.id.editText2);
     }
+
     public void begin(View view)
     {
-        WifiManager mainWifiObj;
+        final WifiManager mainWifiObj;
         flag=false;
         Random r=new Random();
         int start=Integer.parseInt(e1.getText().toString());
@@ -65,7 +67,7 @@ public class MainActivity extends ActionBarActivity {
                     else
                     {
                         PeerListenerImpl peerListenerImpl;
-                        peerListenerImpl=new PeerListenerImpl();
+                        peerListenerImpl=new PeerListenerImpl(false);
 
                     }
                 } catch (InterruptedException e) {
@@ -75,10 +77,39 @@ public class MainActivity extends ActionBarActivity {
             }
         }).start();
         mainWifiObj = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiScanReceiver wifiReciever = new WifiScanReceiver(mainWifiObj,flag);
+        wifiReciever = new WifiScanReceiver(mainWifiObj,flag);
         registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         mainWifiObj.disconnect();
         mainWifiObj.startScan();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Log.d("WifiScanReceiver", "Thread started");
+                    if(mainWifiObj.getConnectionInfo().getSSID()!=null) {
+                        if (mainWifiObj.getConnectionInfo().getSSID().compareTo("Opp") == 0) {
+                            flag = false;
+                            Log.d("WifiScanReceiver", "Opp connected!");
+                            unregisterReceiver(wifiReciever);
+                            break;
+                        }
+                        else {
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }else {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }).start();
 
     }
     private void createWifiAccessPoint() {
@@ -119,7 +150,9 @@ public class MainActivity extends ActionBarActivity {
                     }
                     if(apstatus)
                     {
-
+                        PeerListenerImpl peerListenerImpl;
+                        peerListenerImpl=new PeerListenerImpl(true);
+                        unregisterReceiver(wifiReciever);
                         //System.out.println("SUCCESSdddd");
                         //statusView.append("\nAccess Point Created!");
                         //finish();
@@ -165,5 +198,6 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
 
