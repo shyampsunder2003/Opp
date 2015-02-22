@@ -14,11 +14,11 @@ public class Discovery {
     DatagramSocket socket = null;
     SendThread sendThread;
     ReceiveThread receiveThread;
-    PeerListener listener;
-    PeerListenerImpl mContext;
+    PeerListener mContext;
     TimerTask timerTask;
-    Discovery(PeerListenerImpl c)
+    Discovery(PeerListener c)
     {
+
         mContext=c;
         try {
             socket=new DatagramSocket(10000);
@@ -34,11 +34,11 @@ public class Discovery {
             e.printStackTrace();
         }
         try {
-            sendThread=new SendThread();
+            sendThread=new SendThread((Context) mContext);
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        receiveThread=new ReceiveThread(socket, (PeerListener) mContext);
+        receiveThread=new ReceiveThread(socket, mContext);
         timerTask=new DiscoveryBroadcastTimer(sendThread);
         Timer timer = new Timer();
         timer.schedule(timerTask, 0,5000);
@@ -51,10 +51,8 @@ public class Discovery {
         if(!receiveThread.isAlive())
             receiveThread.start();
     }
-    public void stop()
+    public void broadcastStop()
     {
         timerTask.cancel();
-        receiveThread.interrupt();
-        socket.close();
     }
 }

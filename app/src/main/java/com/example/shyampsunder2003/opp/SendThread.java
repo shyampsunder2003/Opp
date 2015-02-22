@@ -2,6 +2,7 @@ package com.example.shyampsunder2003.opp;
 
 import android.content.Context;
 import android.net.DhcpInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
@@ -17,12 +18,18 @@ import java.net.SocketException;
 public class SendThread extends Thread {
     DatagramSocket sendSocket;
     Context mContext;
-    SendThread() throws SocketException {
+    WifiManager wifi;
+    SendThread(Context context) throws SocketException {
+        mContext=context;
         sendSocket=new DatagramSocket();
+        wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
     }
     public void run()
     {
-        String data = "Broadcast";
+
+        WifiInfo wInfo = wifi.getConnectionInfo();
+        String macAddress = wInfo.getMacAddress();
+        String data = "Broadcast"+"*"+macAddress;
         try {
             if (sendSocket != null) {
                 sendSocket.setBroadcast(true);
@@ -55,7 +62,6 @@ public class SendThread extends Thread {
         }
     }
     InetAddress getBroadcastAddress() throws IOException {
-        WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         DhcpInfo dhcp = wifi.getDhcpInfo();
         int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
         byte[] quads = new byte[4];

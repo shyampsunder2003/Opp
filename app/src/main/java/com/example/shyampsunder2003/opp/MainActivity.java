@@ -38,6 +38,8 @@ public class MainActivity extends ActionBarActivity {
         text=(TextView) findViewById(R.id.textView);
         e1=(EditText) findViewById(R.id.editText);
         e2=(EditText) findViewById(R.id.editText2);
+        WifiManager wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        wifiManager.setWifiEnabled(true);
     }
 
     public void begin(View view)
@@ -57,6 +59,15 @@ public class MainActivity extends ActionBarActivity {
                     int i;
                     for(i = 0; i < randomval && flag; i++) {
                         Thread.sleep(1000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String currentText=text.getText().toString();
+                                int currentVal=Integer.parseInt(currentText);
+                                currentVal--;
+                                text.setText(String.valueOf(currentVal));
+                            }
+                        });
                         Log.d("Sleep",String.valueOf(i));
                     }
                     if(flag)
@@ -64,12 +75,7 @@ public class MainActivity extends ActionBarActivity {
                         Log.d("Hotspot","Turned on");
                         createWifiAccessPoint();
                     }
-                    else
-                    {
-                        PeerListenerImpl peerListenerImpl;
-                        peerListenerImpl=new PeerListenerImpl(false);
 
-                    }
                 } catch (InterruptedException e) {
 
                 }
@@ -85,12 +91,14 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void run() {
                 while (true) {
-                    Log.d("WifiScanReceiver", "Thread started");
+                    Log.d("WifiScanReceiver", "Thread started "+mainWifiObj.getConnectionInfo().getSSID());
                     if(mainWifiObj.getConnectionInfo().getSSID()!=null) {
-                        if (mainWifiObj.getConnectionInfo().getSSID().compareTo("Opp") == 0) {
+                        if (mainWifiObj.getConnectionInfo().getSSID().compareTo("\"Opp\"") == 0 || mainWifiObj.getConnectionInfo().getSSID().compareTo("Opp") == 0 ) {
                             flag = false;
                             Log.d("WifiScanReceiver", "Opp connected!");
+                            Intent intent=new Intent(getApplicationContext(), Communication.class);
                             unregisterReceiver(wifiReciever);
+                            startActivity(intent);
                             break;
                         }
                         else {
@@ -150,8 +158,6 @@ public class MainActivity extends ActionBarActivity {
                     }
                     if(apstatus)
                     {
-                        PeerListenerImpl peerListenerImpl;
-                        peerListenerImpl=new PeerListenerImpl(true);
                         unregisterReceiver(wifiReciever);
                         //System.out.println("SUCCESSdddd");
                         //statusView.append("\nAccess Point Created!");
