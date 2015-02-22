@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.Collections;
@@ -17,10 +18,10 @@ import java.util.LinkedList;
 public class DatabaseHelp {
 
     public static final String KEY_ROWID = "_id";
-    public static final String KEY_MAC = "MAC Address";
+    public static final String KEY_MAC = "MACAddress";
     public static final String KEY_TIME = "Time";       //Timestamp at the time of clicking check
     public static final String KEY_MESSAGE= "Message";
-    public static final String KEY_MESSAGE_HASH= "Message Hash";
+    public static final String KEY_MESSAGE_HASH= "MessageHash";
     public static final String KEY_UID= "Unique Identifier";
     private static final String DATABASE_NAME = "DatabaseDB";
     private static final String DATABASE_TABLE1 = "Devices";  //Contains all the clues downloaded from parse
@@ -41,12 +42,12 @@ public class DatabaseHelp {
         @Override
         public void onCreate(SQLiteDatabase db) {
             // TODO Auto-generated method stub
-            db.execSQL("CREATE TABLE " + DATABASE_TABLE1 + " (" +                               //Table creation for clues
+            db.execSQL("CREATE TABLE " + DATABASE_TABLE1 + " (" +
                             KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             KEY_MAC + " TEXT NOT NULL, " +
                             KEY_TIME + " TEXT NOT NULL);"
             );
-            db.execSQL("CREATE TABLE " + DATABASE_TABLE2 + " (" +                               //Table creation for results
+            db.execSQL("CREATE TABLE " + DATABASE_TABLE2 + " (" +
                             KEY_ROWID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             KEY_TIME + " TEXT NOT NULL, " + KEY_MESSAGE + " TEXT NOT NULL, "+ KEY_MESSAGE_HASH + " TEXT NOT NULL, "+ KEY_MAC + " TEXT NOT NULL);"
             );
@@ -107,13 +108,16 @@ public class DatabaseHelp {
     public boolean containsdevice(String mac)                                           //This is to enable us to find out how many clues have passed
     {                                                                       // and which clue must be served next
         String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
-        Cursor c = ourDatabase.query(DATABASE_TABLE1, columns,KEY_MAC+"=\""+mac+"\"", null, null, null, null);
+        Cursor c;
+        c = ourDatabase.query(DATABASE_TABLE1, columns,KEY_MAC + "=\'" + mac + "\'", null, null, null, null);
         int result=0;
         result=c.getCount();
+        c.close();
         if(result==0)
             return false;
         else
             return true;
+
     }
     public LinkedList getDevices()
     {
@@ -130,7 +134,7 @@ public class DatabaseHelp {
             result =c.getString(iMac) + "*" + c.getString(iTime) ;
             l.addLast(result);
         }
-
+        c.close();
         return l;
     }
     public LinkedList getMessages()
@@ -149,6 +153,7 @@ public class DatabaseHelp {
             result =c.getString(iTime) + " " + c.getString(iMessage) + " " + c.getString(iMac) ;
             l.addLast(result);
         }
+        c.close();
         return l;
     }
     public String MD5(String md5) {
@@ -183,6 +188,7 @@ public class DatabaseHelp {
         {
             result+=messages.get(i);
         }
+        c.close();
         return MD5(result);
     }
     public void updateDeviceTime(String mac)
@@ -206,6 +212,8 @@ public class DatabaseHelp {
         for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()){
             result =c.getString(iTime) ;
         }
+        c.close();
+        Log.d("Long value",result);
         return Long.valueOf(result);
     }
 

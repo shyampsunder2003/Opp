@@ -31,9 +31,9 @@ class WifiScanReceiver extends BroadcastReceiver {
         for (WifiConfiguration i : list) {
             if(wifiManager.getConnectionInfo().getSSID()==null) {
                 if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    wifiManager.disconnect();
+                    //wifiManager.disconnect();
                     wifiManager.enableNetwork(i.networkId, true);
-                    wifiManager.reconnect();
+                    //wifiManager.reconnect();
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {

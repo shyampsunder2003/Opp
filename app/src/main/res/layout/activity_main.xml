@@ -23,7 +23,8 @@
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="48dp"
-        android:hint="Start Value" />
+        android:hint="Start Value"
+        android:text="50" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -33,7 +34,8 @@
         android:id="@+id/editText2"
         android:layout_below="@+id/editText"
         android:layout_centerHorizontal="true"
-        android:hint="End Value" />
+        android:hint="End Value"
+        android:text="100" />
 
     <Button
         android:layout_width="wrap_content"
