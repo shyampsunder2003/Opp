@@ -26,6 +26,19 @@ public class SendThread extends Thread {
     }
     public void run()
     {
+        while (true) {
+            if (wifi.getConnectionInfo().getSSID() != null) {
+                if (wifi.getConnectionInfo().getSSID().compareTo("\"Opp\"") == 0 || wifi.getConnectionInfo().getSSID().compareTo("Opp") == 0) {
+                    break;
+                } else {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
 
         WifiInfo wInfo = wifi.getConnectionInfo();
         String macAddress = wInfo.getMacAddress();

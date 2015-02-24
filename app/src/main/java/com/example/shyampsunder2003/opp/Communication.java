@@ -35,50 +35,50 @@ public class Communication extends ActionBarActivity implements PeerListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_communication);
         wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        editText=(EditText) findViewById(R.id.editText3);
-        if(databaseHelp==null)
-        databaseHelp=new DatabaseHelp(this);
+        editText = (EditText) findViewById(R.id.editText3);
+        if (databaseHelp == null)
+            databaseHelp = new DatabaseHelp(this);
 //        databaseHelp.open();
 //        databaseHelp.delete();
 //        databaseHelp.open();
-        nodeList=new LinkedList();
-        macList=new LinkedList();
-        final long timeForDeviceRefresh=600000;
-        textScreen=(TextView) findViewById(R.id.textScreen);
-        final Discovery discovery=new Discovery(this);
-        new Thread(new Runnable() {
-            public String MD5(String md5) {
-                try {
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-                    byte[] array = md.digest(md5.getBytes());
-                    StringBuffer sb = new StringBuffer();
-                    for (int i = 0; i < array.length; ++i) {
-                        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+
+            nodeList = new LinkedList();
+            macList = new LinkedList();
+            final long timeForDeviceRefresh = 600000;
+            textScreen = (TextView) findViewById(R.id.textScreen);
+            final Discovery discovery = new Discovery(this);
+            new Thread(new Runnable() {
+                public String MD5(String md5) {
+                    try {
+                        MessageDigest md = MessageDigest.getInstance("MD5");
+                        byte[] array = md.digest(md5.getBytes());
+                        StringBuffer sb = new StringBuffer();
+                        for (int i = 0; i < array.length; ++i) {
+                            sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+                        }
+                        return sb.toString();
+                    } catch (NoSuchAlgorithmException e) {
                     }
-                    return sb.toString();
-                } catch (NoSuchAlgorithmException e) {
+                    return null;
                 }
-                return null;
-            }
-            @Override
-            public void run() {
-                try {
-                    discovery.startReceive();
-                    Thread.sleep(5000);
-                    discovery.startBroadcast();
-                    Thread.sleep(10000);
-                    while(nodeList.size()==0);
-                    discovery.broadcastStop();
-                    int i;
-                    long devicetime=0;
-                    for(i=0;i<nodeList.size();++i)
-                    {
-                        Log.d("Communication","nodeList");
-                        databaseHelp.open();
-                        devicetime=databaseHelp.getDeviceTimestamp((String) macList.get(i));
-                        databaseHelp.close();
-                        if(System.currentTimeMillis()-devicetime>timeForDeviceRefresh)
-                        {
+
+                @Override
+                public void run() {
+                    try {
+                        discovery.startReceive();
+                        Thread.sleep(5000);
+                        discovery.startBroadcast();
+                        Thread.sleep(10000);
+                        while (nodeList.size() == 0) ;
+                        discovery.broadcastStop();
+                        int i;
+                        long devicetime = 0;
+                        for (i = 0; i < nodeList.size(); ++i) {
+                            Log.d("Communication", "nodeList");
+                            databaseHelp.open();
+                            devicetime = databaseHelp.getDeviceTimestamp((String) macList.get(i));
+                            databaseHelp.close();
+                            if (System.currentTimeMillis() - devicetime > timeForDeviceRefresh) {
 //                            databaseHelp.updateDeviceTime((String) macList.get(i));
 //                            messageList=databaseHelp.getMessages();
 //                            if(messageList.size()!=0)
@@ -97,37 +97,36 @@ public class Communication extends ActionBarActivity implements PeerListener{
 //                                DatagramPacket response = new DatagramPacket(buf, buf.length);
 //                                socket.receive(response);
 //                            }
-                            final int finalI = i;
-                            final long finalDevicetime = devicetime;
-                            runOnUiThread(new Runnable() {
-                                  @Override
-                                  public void run() {
-                                      String update=String.valueOf(macList.get(finalI))+": "+String.valueOf(System.currentTimeMillis()- finalDevicetime >timeForDeviceRefresh);
-                                      updateScreen(update);
-                                      databaseHelp.open();
-                                      databaseHelp.updateDeviceTime((String) macList.get(finalI));
-                                      databaseHelp.close();
-                                  }
-                              });
-                        }
-                        else {
-                            final long finalDevicetime1 = devicetime;
-                            final int finalI1 = i;
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateScreen("Device MAC: "+macList.get(finalI1)+", "+String.valueOf((System.currentTimeMillis()- finalDevicetime1)/60000+" minutes earlier"));
-                                }
-                            });
+                                final int finalI = i;
+                                final long finalDevicetime = devicetime;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String update = String.valueOf(macList.get(finalI)) + ": " + String.valueOf(System.currentTimeMillis() - finalDevicetime > timeForDeviceRefresh);
+                                        updateScreen(update);
+                                        databaseHelp.open();
+                                        databaseHelp.updateDeviceTime((String) macList.get(finalI));
+                                        databaseHelp.close();
+                                    }
+                                });
+                            } else {
+                                final long finalDevicetime1 = devicetime;
+                                final int finalI1 = i;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        updateScreen("Device MAC: " + macList.get(finalI1) + ", " + String.valueOf((System.currentTimeMillis() - finalDevicetime1) / 60000 + " minutes earlier"));
+                                    }
+                                });
 
+                            }
                         }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
-            }
-        }).start();
+                }
+            }).start();
     }
     public String MD5(String md5) {
         try {

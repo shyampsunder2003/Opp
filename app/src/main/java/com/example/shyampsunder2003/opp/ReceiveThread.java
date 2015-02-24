@@ -46,11 +46,11 @@ public class ReceiveThread extends Thread {
                 message=messageString.substring(0,messageString.indexOf("*"));
                 if (message.compareTo("I am here!") == 0) {
                     Log.d("Ack", response.getAddress().getHostAddress());
-                    if (!list.contains(response.getAddress().getHostAddress())) {
-                        list.addFirst(response.getAddress().getHostAddress());
+                    //if (!list.contains(response.getAddress().getHostAddress())) {
+                    //    list.addFirst(response.getAddress().getHostAddress());
                         String mac=messageString.substring(messageString.indexOf("*")+1,messageString.length());
                         receiveListener.peerFound(response.getAddress().getHostAddress(),mac);
-                    }
+                    //}
                 }
                 else if(message.compareTo("Broadcast") == 0)
                 {

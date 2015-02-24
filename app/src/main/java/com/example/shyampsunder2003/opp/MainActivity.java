@@ -97,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
                             flag = false;
                             Log.d("WifiScanReceiver", "Opp connected!");
                             Intent intent=new Intent(getApplicationContext(), Communication.class);
-                            unregisterReceiver(wifiReciever);
+                            //unregisterReceiver(wifiReciever);
                             startActivity(intent);
                             break;
                         }

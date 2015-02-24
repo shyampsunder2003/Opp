@@ -7,6 +7,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,14 +26,16 @@ class WifiScanReceiver extends BroadcastReceiver {
         WifiConfiguration conf = new WifiConfiguration();
         conf.SSID = "\"" + networkSSID + "\"";
         conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        wifiManager.addNetwork(conf);
+        List<WifiConfiguration> configNetworks= wifiManager.getConfiguredNetworks();
+        if(!configNetworks.contains(conf))
+            wifiManager.addNetwork(conf);
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         Log.d("Wifi", "Reached the connection phase ");
         for (WifiConfiguration i : list) {
             if(wifiManager.getConnectionInfo().getSSID()==null) {
                 if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
                     //wifiManager.disconnect();
-                    wifiManager.enableNetwork(i.networkId, true);
+                    //wifiManager.enableNetwork(i.networkId, false);
                     //wifiManager.reconnect();
                     try {
                         Thread.sleep(5000);
