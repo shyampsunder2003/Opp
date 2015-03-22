@@ -96,6 +96,11 @@ public class MainActivity extends ActionBarActivity {
                         if (mainWifiObj.getConnectionInfo().getSSID().compareTo("\"Opp\"") == 0 || mainWifiObj.getConnectionInfo().getSSID().compareTo("Opp") == 0 ) {
                             flag = false;
                             Log.d("WifiScanReceiver", "Opp connected!");
+                            try {
+                                Thread.sleep(10000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             Intent intent=new Intent(getApplicationContext(), Communication.class);
                             //unregisterReceiver(wifiReciever);
                             startActivity(intent);
