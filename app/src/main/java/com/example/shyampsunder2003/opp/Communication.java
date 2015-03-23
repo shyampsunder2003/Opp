@@ -44,7 +44,7 @@ public class Communication extends ActionBarActivity implements PeerListener{
 
             nodeList = new LinkedList();
             macList = new LinkedList();
-            final long timeForDeviceRefresh = 600000;
+            final long timeForDeviceRefresh = 60;
             textScreen = (TextView) findViewById(R.id.textScreen);
             final Discovery discovery = new Discovery(this);
             new Thread(new Runnable() {
@@ -79,49 +79,114 @@ public class Communication extends ActionBarActivity implements PeerListener{
                             devicetime = databaseHelp.getDeviceTimestamp((String) macList.get(i));
                             databaseHelp.close();
                             if (System.currentTimeMillis() - devicetime > timeForDeviceRefresh) {
-//                            databaseHelp.updateDeviceTime((String) macList.get(i));
-//                            messageList=databaseHelp.getMessages();
-//                            if(messageList.size()!=0)
-//                            {
-//                                String temp="";
-//                                for(int j=0;j<messageList.size();++j)
-//                                {
-//                                    temp+=messageList.get(j);
-//                                }
-//                                String hashString=MD5(temp);
-//                                DatagramSocket socket = new DatagramSocket(11000);
-//                                DatagramPacket packet = new DatagramPacket(hashString.getBytes(), hashString.length(),
-//                                        InetAddress.getByName((String) nodeList.get(i)), 10000);
-//                                socket.send(packet);
-//                                byte[] buf = new byte[1024];
-//                                DatagramPacket response = new DatagramPacket(buf, buf.length);
-//                                socket.receive(response);
-//                            }
-                                final int finalI = i;
-                                final long finalDevicetime = devicetime;
+                            databaseHelp.open();
+                            databaseHelp.updateDeviceTime((String) macList.get(i));
+                            messageList=databaseHelp.getMessages();
+                            databaseHelp.close();
+                            if(messageList.size()!=0)
+                            {
+                                String temp="";
+                                for(int j=0;j<messageList.size();++j)
+                                {
+                                    temp+="/"+messageList.get(j);
+                                }
+                                String hashString=MD5(temp);
+                                String request="getMessageListHash*";
+                                DatagramSocket socket = new DatagramSocket(11000);
+                                DatagramPacket packet = new DatagramPacket(request.getBytes(), request.length(),
+                                        InetAddress.getByName((String) nodeList.get(i)), 10000);
+                                socket.send(packet);
+                                byte[] buf = new byte[1024];
+                                DatagramPacket response = new DatagramPacket(buf, buf.length);
+                                socket.receive(response);
+                                String messageString = new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
+                                final String finalMessageString = messageString;
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        String update = String.valueOf(macList.get(finalI)) + ": " + String.valueOf(System.currentTimeMillis() - finalDevicetime > timeForDeviceRefresh);
-                                        updateScreen(update);
-                                        databaseHelp.open();
-                                        databaseHelp.updateDeviceTime((String) macList.get(finalI));
-                                        databaseHelp.close();
+                                        updateScreen(finalMessageString);
                                     }
                                 });
+                                databaseHelp.open();
+                                int compareResult=databaseHelp.getMessageListHash().compareTo(messageString);
+                                databaseHelp.close();
+                                if(compareResult==0)
+                                {
+                                    final DatagramPacket finalResponse = response;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateScreen("No messages to transfer to "+ finalResponse.getAddress());
+                                        }
+                                    });
+                                    socket.close();
+                                }
+                                else
+                                {
+                                    request="getMessageHashSize*";
+                                    packet = new DatagramPacket(request.getBytes(), request.length(),
+                                            InetAddress.getByName((String) nodeList.get(i)), 10000);
+                                    socket.send(packet);
+                                    response=new DatagramPacket(buf,buf.length);
+                                    socket.receive(response);
+                                    messageString=  new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
+                                    int messageListSize=Integer.parseInt(messageString);
+                                    for(int j=0;j<messageListSize;++j)
+                                    {
+                                        request="getMessageHash"+j+"*";
+                                        packet = new DatagramPacket(request.getBytes(), request.length(),
+                                                InetAddress.getByName((String) nodeList.get(i)), 10000);
+                                        socket.send(packet);
+                                        response=new DatagramPacket(buf,buf.length);
+                                        socket.receive(response);
+                                        messageString=  new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
+                                        databaseHelp.open();
+                                        boolean containsMessage=databaseHelp.containsMessage(messageString);
+                                        databaseHelp.close();
+                                        if(!containsMessage)
+                                        {
+                                            request="getMessage"+j+"*";
+                                            packet = new DatagramPacket(request.getBytes(), request.length(),
+                                                    InetAddress.getByName((String) nodeList.get(i)), 10000);
+                                            socket.send(packet);
+                                            response=new DatagramPacket(buf,buf.length);
+                                            socket.receive(response);
+                                            messageString=  new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
+                                            final String message=messageString.substring(0,messageString.indexOf("*"));
+                                            String mac=messageString.substring(messageString.indexOf("*") + 1, messageString.length());
+                                            databaseHelp.open();
+                                            databaseHelp.createMessageEntry(message,mac);
+                                            databaseHelp.close();
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    updateScreen("Message: "+ message+" added to database");
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+
+                            }
                             } else {
                                 final long finalDevicetime1 = devicetime;
                                 final int finalI1 = i;
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        updateScreen("Device MAC: " + macList.get(finalI1) + ", " + String.valueOf((System.currentTimeMillis() - finalDevicetime1) / 60000 + " minutes earlier"));
+                                        updateScreen("Not new Device");
                                     }
                                 });
 
                             }
                         }
                     } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
 
@@ -158,7 +223,7 @@ public class Communication extends ActionBarActivity implements PeerListener{
         updateScreen("Message List");
         for(int i=0;i<messages.size();++i)
         {
-            updateScreen(String.valueOf(i)+":"+messages.get(i)+MD5((String) messages.get(i)));
+            updateScreen(String.valueOf(i)+":"+messages.get(i));
         }
         updateScreen("Message List Hash String");
         updateScreen(databaseHelp.getMessageListHash());

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -83,8 +84,15 @@ public class MainActivity extends ActionBarActivity {
             }
         }).start();
         mainWifiObj = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        wifiReciever = new WifiScanReceiver(mainWifiObj,flag);
-        registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+//        wifiReciever = new WifiScanReceiver(mainWifiObj,flag);
+//        registerReceiver(wifiReciever, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        WifiConfiguration conf = new WifiConfiguration();
+        String networkSSID="Opp";
+        conf.SSID = "\"" + networkSSID + "\"";
+        conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        List<WifiConfiguration> configNetworks= mainWifiObj.getConfiguredNetworks();
+        if(!configNetworks.contains(conf))
+            mainWifiObj.addNetwork(conf);
         mainWifiObj.disconnect();
         mainWifiObj.startScan();
         new Thread(new Runnable() {
@@ -102,9 +110,10 @@ public class MainActivity extends ActionBarActivity {
                                 e.printStackTrace();
                             }
                             Intent intent=new Intent(getApplicationContext(), Communication.class);
-                            //unregisterReceiver(wifiReciever);
+//                            unregisterReceiver(wifiReciever);
                             startActivity(intent);
                             break;
+
                         }
                         else {
                             try {
@@ -163,7 +172,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                     if(apstatus)
                     {
-                        unregisterReceiver(wifiReciever);
+//                        unregisterReceiver(wifiReciever);
                         //System.out.println("SUCCESSdddd");
                         //statusView.append("\nAccess Point Created!");
                         //finish();

@@ -29,13 +29,14 @@ class WifiScanReceiver extends BroadcastReceiver {
         List<WifiConfiguration> configNetworks= wifiManager.getConfiguredNetworks();
         if(!configNetworks.contains(conf))
             wifiManager.addNetwork(conf);
+
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         Log.d("Wifi", "Reached the connection phase ");
         for (WifiConfiguration i : list) {
             if(wifiManager.getConnectionInfo().getSSID()==null) {
                 if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
                     //wifiManager.disconnect();
-                    //wifiManager.enableNetwork(i.networkId, false);
+                    wifiManager.enableNetwork(i.networkId, true);
                     //wifiManager.reconnect();
                     try {
                         Thread.sleep(5000);
