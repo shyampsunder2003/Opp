@@ -98,7 +98,9 @@ public class ReceiveThread extends Thread {
                     //databaseHelp.open();
                 LinkedList l = databaseHelp.getMessages();
                 String messageResponse = (String) l.get(messageNumber);
-                messageResponse += "*" + mac;
+                WifiInfo wInfo = wm.getConnectionInfo();
+                String macAddress = wInfo.getMacAddress();
+                messageResponse += "*" + macAddress;
                 data = messageResponse.getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, response.getAddress(), 11000);
                 receiveSocket.send(packet);

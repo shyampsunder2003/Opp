@@ -27,6 +27,7 @@ public class DatabaseHelp {
     private static final String DATABASE_TABLE1 = "Devices";  //Contains all the clues downloaded from parse
     private static final String DATABASE_TABLE2 = "Messages";    //Contains all the results of check along with timestamps
     private static final int DATABASE_VERSION = 1;
+    private static boolean openFlag=false;
 
     private DbHelper ourHelper;
     private final Context ourContext;
@@ -75,11 +76,20 @@ public class DatabaseHelp {
     }
 
     public DatabaseHelp open() throws SQLException {
+        while(openFlag==true){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        openFlag=true;
         ourHelper = new DbHelper(ourContext);
         ourDatabase = ourHelper.getWritableDatabase();
         return this;
     }
     public void close(){
+        openFlag=false;
         ourHelper.close();
     }
 
