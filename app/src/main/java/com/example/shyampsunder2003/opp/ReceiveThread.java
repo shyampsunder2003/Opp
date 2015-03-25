@@ -42,7 +42,7 @@ public class ReceiveThread extends Thread {
         try {
         while (true) {
 
-            databaseHelp.open();
+            //databaseHelp.open();
             receiveSocket.receive(response);
             byte[] data = response.getData();
             String messageString = new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
@@ -69,40 +69,40 @@ public class ReceiveThread extends Thread {
                 }
 
             } else if (message.compareTo("getMessageListHash") == 0) {
-                    databaseHelp.open();
+                    //databaseHelp.open();
                 String hash = databaseHelp.getMessageListHash();
                 data = hash.getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, response.getAddress(), 11000);
                 receiveSocket.send(packet);
-                    databaseHelp.close();
+                //databaseHelp.close();
             } else if (message.compareTo("getMessageHashSize") == 0) {
-                    databaseHelp.open();
+                    //databaseHelp.open();
                 LinkedList l = databaseHelp.getMessages();
                 int size = l.size();
                 String messageSize = String.valueOf(size);
                 data = messageSize.getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, response.getAddress(), 11000);
                 receiveSocket.send(packet);
-                    databaseHelp.close();
+                    //databaseHelp.close();
             } else if (message.substring(0, message.length() - 1).compareTo("getMessageHash") == 0) {
                 int messageNumber = Integer.parseInt(message.substring(message.length() - 1, message.length()));
-                    databaseHelp.open();
+                    //databaseHelp.open();
                 LinkedList l = databaseHelp.getMessagesHash();
                 String messageHashResponse = (String) l.get(messageNumber);
                 data = messageHashResponse.getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, response.getAddress(), 11000);
                 receiveSocket.send(packet);
-                    databaseHelp.close();
+                    //databaseHelp.close();
             } else if (message.substring(0, message.length() - 1).compareTo("getMessage") == 0) {
                 int messageNumber = Integer.parseInt(message.substring(message.length() - 1, message.length()));
-                    databaseHelp.open();
+                    //databaseHelp.open();
                 LinkedList l = databaseHelp.getMessages();
                 String messageResponse = (String) l.get(messageNumber);
                 messageResponse += "*" + mac;
                 data = messageResponse.getBytes();
                 DatagramPacket packet = new DatagramPacket(data, data.length, response.getAddress(), 11000);
                 receiveSocket.send(packet);
-                    databaseHelp.close();
+                    //databaseHelp.close();
             }
         }
         }

@@ -85,16 +85,20 @@ public class DatabaseHelp {
 
     public long createDeviceEntry(String mac) {            //Inserting the clues
         // TODO Auto-generated method stub
+        open();
         long time = (long) (System.currentTimeMillis());
         String timestamp=String.valueOf(time);
         ContentValues cv = new ContentValues();
         cv.put(KEY_MAC, mac);
         cv.put(KEY_TIME, timestamp);
         Log.d("Database","Database entry for device created "+mac);
-        return ourDatabase.insert(DATABASE_TABLE1, null, cv);
+        long result=ourDatabase.insert(DATABASE_TABLE1, null, cv);
+        close();
+        return result;
     }
     public long createMessageEntry(String message, String mac) {
         // TODO Auto-generated method stub
+        open();
         long time = (long) (System.currentTimeMillis());
         String timestamp=String.valueOf(time);
         ContentValues cv = new ContentValues();
@@ -103,30 +107,38 @@ public class DatabaseHelp {
         cv.put(KEY_TIME, timestamp);
         cv.put(KEY_MAC, mac);
         Log.d("Database","Message entry created "+message);
-        return ourDatabase.insert(DATABASE_TABLE2, null, cv);
+        long result=ourDatabase.insert(DATABASE_TABLE2, null, cv);
+        close();
+        return result;
+
     }
     public boolean containsdevice(String mac)
     {
+        open();
         String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
         Cursor c;
         c = ourDatabase.query(DATABASE_TABLE1, columns,KEY_MAC + "=\'" + mac + "\'", null, null, null, null);
         int result=0;
         result=c.getCount();
         c.close();
+        close();
         if(result==0)
             return false;
         else
             return true;
 
+
     }
     public boolean containsMessage(String hash)
     {
+        open();
         String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_MESSAGE,KEY_MESSAGE_HASH, KEY_MAC};
         Cursor c;
         c = ourDatabase.query(DATABASE_TABLE2, columns,KEY_MESSAGE_HASH + "=\'" + hash + "\'", null, null, null, null);
         int result=0;
         result=c.getCount();
         c.close();
+        close();
         if(result==0)
             return false;
         else
@@ -136,6 +148,7 @@ public class DatabaseHelp {
 
     public LinkedList getDevices()
     {
+        open();
         Log.d("Database", "getDevices method invoked");
         LinkedList l=new LinkedList();
         String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
@@ -150,10 +163,12 @@ public class DatabaseHelp {
             l.addLast(result);
         }
         c.close();
+        close();
         return l;
     }
     public LinkedList getMessages()
     {
+        open();
         Log.d("Database", "getMessages method invoked");
         LinkedList l=new LinkedList();
         String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_MESSAGE,KEY_MESSAGE_HASH, KEY_MAC};
@@ -170,10 +185,12 @@ public class DatabaseHelp {
             l.addLast(result);
         }
         c.close();
+        close();
         return l;
     }
     public LinkedList getMessagesHash()
     {
+        open();
         Log.d("Database", "getMessages method invoked");
         LinkedList l=new LinkedList();
         String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_MESSAGE,KEY_MESSAGE_HASH, KEY_MAC};
@@ -186,7 +203,9 @@ public class DatabaseHelp {
             l.addLast(result);
         }
         c.close();
+        close();
         return l;
+
     }
     public String MD5(String md5) {
         try {
@@ -203,6 +222,7 @@ public class DatabaseHelp {
     }
     public String getMessageListHash()
     {
+        open();
         String[] columns = new String[]{ KEY_ROWID, KEY_TIME, KEY_MESSAGE,KEY_MESSAGE_HASH, KEY_MAC};
         Cursor c = ourDatabase.query(DATABASE_TABLE2, columns,null, null, null, null, null);
         int iRow = c.getColumnIndex(KEY_ROWID);
@@ -222,10 +242,12 @@ public class DatabaseHelp {
         }
         c.close();
         Log.d("Database","Hashlist is: "+MD5(result));
+        close();
         return MD5(result);
     }
     public void updateDeviceTime(String mac)
     {
+        open();
         long time = (long) (System.currentTimeMillis());
         String timestamp=String.valueOf(time);
         ContentValues cv = new ContentValues();
@@ -233,9 +255,11 @@ public class DatabaseHelp {
         cv.put(KEY_TIME, timestamp);
         Log.d("Database","Database entry for device updated"+mac+timestamp);
         ourDatabase.update(DATABASE_TABLE1,cv,KEY_MAC+"=\""+mac+"\"",null);
+        close();
     }
     public long getDeviceTimestamp(String mac)
     {
+        open();
         String[] columns = new String[]{ KEY_ROWID, KEY_MAC, KEY_TIME};
         Cursor c = ourDatabase.query(DATABASE_TABLE1, columns,KEY_MAC+"=\""+mac+"\"", null, null, null, null);
         int iRow = c.getColumnIndex(KEY_ROWID);
@@ -247,6 +271,7 @@ public class DatabaseHelp {
         }
         c.close();
         Log.d("Long value",result);
+        close();
         return Long.valueOf(result);
     }
 

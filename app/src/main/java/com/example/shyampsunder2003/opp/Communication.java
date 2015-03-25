@@ -38,9 +38,9 @@ public class Communication extends ActionBarActivity implements PeerListener{
         editText = (EditText) findViewById(R.id.editText3);
         if (databaseHelp == null)
             databaseHelp = new DatabaseHelp(this);
-//        databaseHelp.open();
+//        //databaseHelp.open();
 //        databaseHelp.delete();
-//        databaseHelp.open();
+//        //databaseHelp.open();
 
             nodeList = new LinkedList();
             macList = new LinkedList();
@@ -75,14 +75,14 @@ public class Communication extends ActionBarActivity implements PeerListener{
                         long devicetime = 0;
                         for (i = 0; i < nodeList.size(); ++i) {
                             Log.d("Communication", "nodeList");
-                            databaseHelp.open();
+                            //databaseHelp.open();
                             devicetime = databaseHelp.getDeviceTimestamp((String) macList.get(i));
-                            databaseHelp.close();
+                            //databaseHelp.close();
                             if (System.currentTimeMillis() - devicetime > timeForDeviceRefresh) {
-                            databaseHelp.open();
+                            //databaseHelp.open();
                             databaseHelp.updateDeviceTime((String) macList.get(i));
                             messageList=databaseHelp.getMessages();
-                            databaseHelp.close();
+                            //databaseHelp.close();
                             if(messageList.size()!=0)
                             {
                                 String temp="";
@@ -107,9 +107,9 @@ public class Communication extends ActionBarActivity implements PeerListener{
                                         updateScreen(finalMessageString);
                                     }
                                 });
-                                databaseHelp.open();
+                                //databaseHelp.open();
                                 int compareResult=databaseHelp.getMessageListHash().compareTo(messageString);
-                                databaseHelp.close();
+                                //databaseHelp.close();
                                 if(compareResult==0)
                                 {
                                     final DatagramPacket finalResponse = response;
@@ -140,9 +140,9 @@ public class Communication extends ActionBarActivity implements PeerListener{
                                         response=new DatagramPacket(buf,buf.length);
                                         socket.receive(response);
                                         messageString=  new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
-                                        databaseHelp.open();
+                                        //databaseHelp.open();
                                         boolean containsMessage=databaseHelp.containsMessage(messageString);
-                                        databaseHelp.close();
+                                        //databaseHelp.close();
                                         if(!containsMessage)
                                         {
                                             request="getMessage"+j+"*";
@@ -154,9 +154,9 @@ public class Communication extends ActionBarActivity implements PeerListener{
                                             messageString=  new String(response.getData(), response.getOffset(), response.getLength(), "UTF-8");
                                             final String message=messageString.substring(0,messageString.indexOf("*"));
                                             String mac=messageString.substring(messageString.indexOf("*") + 1, messageString.length());
-                                            databaseHelp.open();
+                                            //databaseHelp.open();
                                             databaseHelp.createMessageEntry(message,mac);
-                                            databaseHelp.close();
+                                            //databaseHelp.close();
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
@@ -211,14 +211,14 @@ public class Communication extends ActionBarActivity implements PeerListener{
         WifiInfo wInfo = wm.getConnectionInfo();
         String macAddress = wInfo.getMacAddress();
         String message=editText.getText().toString();
-        databaseHelp.open();
+        //databaseHelp.open();
         databaseHelp.createMessageEntry(message, macAddress);
         editText.setText("");
-        databaseHelp.close();
+        //databaseHelp.close();
     }
     public void done(View view)
     {
-        databaseHelp.open();
+        //databaseHelp.open();
         LinkedList messages=databaseHelp.getMessages();
         updateScreen("Message List");
         for(int i=0;i<messages.size();++i)
@@ -227,7 +227,7 @@ public class Communication extends ActionBarActivity implements PeerListener{
         }
         updateScreen("Message List Hash String");
         updateScreen(databaseHelp.getMessageListHash());
-        databaseHelp.close();
+        //databaseHelp.close();
     }
     @Override
     public void peerFound(final String ip, final String mac) {
@@ -243,13 +243,13 @@ public class Communication extends ActionBarActivity implements PeerListener{
             Log.d("Peer Found",ip+" "+mac+String.valueOf(databaseHelp==null));
             if (databaseHelp==null)
                 databaseHelp=new DatabaseHelp(this);
-            databaseHelp.open();
+            //databaseHelp.open();
             if(!databaseHelp.containsdevice(mac))
             {
                 databaseHelp.createDeviceEntry(mac);
                 Log.d("Peer Found",ip+" "+mac+String.valueOf(databaseHelp==null));
             }
-            databaseHelp.close();
+            //databaseHelp.close();
 
 
         }
