@@ -68,9 +68,8 @@ public class Communication extends ActionBarActivity implements PeerListener{
                         discovery.startReceive();
                         Thread.sleep(5000);
                         discovery.startBroadcast();
-                        Thread.sleep(10000);
                         while (nodeList.size() == 0) ;
-                        discovery.broadcastStop();
+                        Thread.sleep(10000);
                         int i;
                         long devicetime = 0;
                         for (i = 0; i < nodeList.size(); ++i) {
